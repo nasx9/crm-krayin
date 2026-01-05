@@ -1,0 +1,86 @@
+services:
+  krayin:
+    build: .
+    container_name: krayin
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./data/storage:/var/www/html/storage
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - proxy
+      - krayin_internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.krayin.rule=Host(`crm-cognus.catapultadigital.com.br`)
+      - traefik.http.routers.krayin.entrypoints=websecure
+      - traefik.http.routers.krayin.tls=true
+      - traefik.http.routers.krayin.tls.certresolver=letsencrypt
+      - traefik.http.services.krayin.loadbalancer.server.port=80
+      - traefik.http.middlewares.krayin-forward.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.krayin-forward.headers.customrequestheaders.X-Forwarded-Port=443
+      - traefik.http.routers.krayin.middlewares=krayin-forward
+
+  krayin-worker:
+    build: .
+    container_name: krayin-worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./data/storage:/var/www/html/storage
+    networks:
+      - krayin_internal
+    command: ["sh", "-lc", "php artisan queue:work --sleep=3 --tries=3 --timeout=120"]
+
+  krayin-scheduler:
+    build: .
+    container_name: krayin-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./data/storage:/var/www/html/storage
+    networks:
+      - krayin_internal
+    command: ["sh", "-lc", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+
+  mysql:
+    image: mysql:8.0
+    container_name: krayin-mysql
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - krayin_internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: krayin-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - krayin_internal
+
+networks:
+  proxy:
+    external: true
+  krayin_internal:
+    driver: bridge
