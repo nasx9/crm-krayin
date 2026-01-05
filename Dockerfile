@@ -83,11 +83,6 @@ COPY src/ /var/www/html
 RUN composer dump-autoload -o \
  && php artisan package:discover --ansi
 
- RUN rm -f storage/logs \
- && mkdir -p storage/logs \
- && chown -R www-data:www-data storage bootstrap/cache \
- && chmod -R 775 storage bootstrap/cache
-
 # Permissões Laravel
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
  && chown -R www-data:www-data /var/www/html \
