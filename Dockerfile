@@ -79,12 +79,19 @@ COPY src/composer.json src/composer.lock /var/www/html/
 
 RUN git config --global --add safe.directory /var/www/html
 
+RUN composer --version \
+ && php -v \
+ && php -m \
+ && composer diagnose || true
+
 RUN composer install \
     --no-dev \
     --prefer-dist \
     --optimize-autoloader \
     --no-interaction \
-    --no-progress
+    --no-progress \
+    -vvv
+
 
 # Código
 COPY src/ /var/www/html
