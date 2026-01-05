@@ -91,12 +91,13 @@ COPY src/ /var/www/html
 RUN composer dump-autoload -o \
  && php artisan package:discover --ansi
 
-# Permissões Laravel
+# Permissões Laravel (idempotente)
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
- && rm -f storage/logs \
+ && (rm -rf storage/logs || true) \
  && mkdir -p storage/logs \
  && chown -R www-data:www-data /var/www/html \
- && chmod -R 775 storage bootstrap/cache
+ && chmod -R 775 storage bootstrap/cache storage/logs
+
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
   CMD curl -fsS http://localhost/ >/dev/null || exit 1
