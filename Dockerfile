@@ -45,6 +45,7 @@ RUN sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
  && sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
       /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf || true
 
+# Logar IP real atrás do proxy (opcional, não é o HTTPS)
 RUN printf '%s\n' \
 'RemoteIPHeader X-Forwarded-For' \
 'RemoteIPInternalProxy 10.0.0.0/8' \
@@ -53,6 +54,13 @@ RUN printf '%s\n' \
 > /etc/apache2/conf-available/remoteip.conf \
  && a2enconf remoteip
 
+# ESSENCIAL: quando Traefik/Coolify manda X-Forwarded-Proto=https,
+# marca a request como HTTPS para o PHP/Laravel (evita gerar links http)
+RUN printf '%s\n' \
+'SetEnvIf X-Forwarded-Proto "https" HTTPS=on' \
+'SetEnvIf X-Forwarded-SSL "on" HTTPS=on' \
+> /etc/apache2/conf-available/ssl-proxy.conf \
+ && a2enconf ssl-proxy
 
 # -----------------------------
 # Composer
@@ -85,6 +93,8 @@ RUN composer dump-autoload -o \
 
 # Permissões Laravel
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+ && rm -f storage/logs \
+ && mkdir -p storage/logs \
  && chown -R www-data:www-data /var/www/html \
  && chmod -R 775 storage bootstrap/cache
 
