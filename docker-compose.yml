@@ -76,6 +76,10 @@ services:
       APP_URL: "https://crm.catapultadigital.com.br"
       ASSET_URL: "https://crm.catapultadigital.com.br"
       APP_KEY: "base64:6mSkmvlGK6iV7xHeDhL6+ImXZ7pii0mcHtSNmEAO2x8="
+      APP_FORCE_HTTPS: "true"
+      TRUSTEDPROXY_PROXIES: "*"
+      TRUSTEDPROXY_HEADERS: "HEADER_X_FORWARDED_ALL"
+      # se quiser manter, não atrapalha, mas não conte com isso
       FORCE_HTTPS: "true"
       TRUSTED_PROXIES: "*"
 
@@ -113,6 +117,10 @@ services:
       APP_URL: "https://crm.catapultadigital.com.br"
       ASSET_URL: "https://crm.catapultadigital.com.br"
       APP_KEY: "base64:6mSkmvlGK6iV7xHeDhL6+ImXZ7pii0mcHtSNmEAO2x8="
+      APP_FORCE_HTTPS: "true"
+      TRUSTEDPROXY_PROXIES: "*"
+      TRUSTEDPROXY_HEADERS: "HEADER_X_FORWARDED_ALL"
+      # se quiser manter, não atrapalha, mas não conte com isso
       FORCE_HTTPS: "true"
       TRUSTED_PROXIES: "*"
 
