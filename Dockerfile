@@ -53,12 +53,6 @@ RUN printf '%s\n' \
 > /etc/apache2/conf-available/remoteip.conf \
  && a2enconf remoteip
 
-RUN printf '%s\n' \
-'<IfModule mod_headers.c>' \
-'Header always set X-Forwarded-Proto "https"' \
-'</IfModule>' \
-> /etc/apache2/conf-available/forwarded-proto.conf \
- && a2enconf forwarded-proto
 
 # -----------------------------
 # Composer
@@ -88,6 +82,11 @@ COPY src/ /var/www/html
 # Agora roda os scripts do Laravel com o código presente
 RUN composer dump-autoload -o \
  && php artisan package:discover --ansi
+
+ RUN rm -f storage/logs \
+ && mkdir -p storage/logs \
+ && chown -R www-data:www-data storage bootstrap/cache \
+ && chmod -R 775 storage bootstrap/cache
 
 # Permissões Laravel
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
