@@ -13,17 +13,7 @@ services:
     networks:
       - proxy
       - krayin_internal
-    labels:
-      - traefik.enable=true
-      - traefik.docker.network=proxy
-      - traefik.http.routers.krayin.rule=Host(`crm-cognus.catapultadigital.com.br`)
-      - traefik.http.routers.krayin.entrypoints=websecure
-      - traefik.http.routers.krayin.tls=true
-      - traefik.http.routers.krayin.tls.certresolver=letsencrypt
-      - traefik.http.services.krayin.loadbalancer.server.port=80
-      - traefik.http.middlewares.krayin-forward.headers.customrequestheaders.X-Forwarded-Proto=https
-      - traefik.http.middlewares.krayin-forward.headers.customrequestheaders.X-Forwarded-Port=443
-      - traefik.http.routers.krayin.middlewares=krayin-forward
+    
 
   krayin-worker:
     build: .
