@@ -16,10 +16,8 @@ RUN apt-get update \
     $PHPIZE_DEPS \
  && rm -rf /var/lib/apt/lists/*
 
-# GD precisa de configure antes
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
-# Extensões PHP comuns para Laravel/Krayin
 RUN docker-php-ext-install -j"$(nproc)" \
     pdo_mysql \
     mbstring \
@@ -30,14 +28,14 @@ RUN docker-php-ext-install -j"$(nproc)" \
     zip \
     intl \
     calendar \
-    xml
+    xml \
+    fileinfo
 
-# Redis via PECL (precisa do $PHPIZE_DEPS)
 RUN pecl install redis \
  && docker-php-ext-enable redis
 
 # -----------------------------
-# Apache (proxy-aware para HTTPS no Coolify)
+# Apache (proxy-aware)
 # -----------------------------
 RUN a2enmod rewrite headers remoteip
 
@@ -47,7 +45,6 @@ RUN sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
  && sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
       /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf || true
 
-# Confia no proxy interno (Docker/Coolify)
 RUN printf '%s\n' \
 'RemoteIPHeader X-Forwarded-For' \
 'RemoteIPInternalProxy 10.0.0.0/8' \
@@ -56,7 +53,6 @@ RUN printf '%s\n' \
 > /etc/apache2/conf-available/remoteip.conf \
  && a2enconf remoteip
 
-# Garante que o app enxergue HTTPS (evita Mixed Content)
 RUN printf '%s\n' \
 '<IfModule mod_headers.c>' \
 'Header always set X-Forwarded-Proto "https"' \
@@ -69,32 +65,29 @@ RUN printf '%s\n' \
 # -----------------------------
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# -----------------------------
-# App
-# -----------------------------
 WORKDIR /var/www/html
 
-# Cache de build do composer
+# Cache de build: só muda quando composer.* muda
 COPY src/composer.json src/composer.lock /var/www/html/
 
-RUN git config --global --add safe.directory /var/www/html
+RUN git config --global --add safe.directory /var/www/html \
+ && composer config -g process-timeout 2000
 
-RUN composer --version \
- && php -v \
- && php -m \
- && composer diagnose || true
-
+# IMPORTANTE: sem scripts aqui (senão ele chama artisan e falha)
 RUN composer install \
     --no-dev \
     --prefer-dist \
     --optimize-autoloader \
     --no-interaction \
     --no-progress \
-    -vvv
+    --no-scripts
 
-
-# Código
+# Agora sim copia o app (inclui artisan e bootstrap)
 COPY src/ /var/www/html
+
+# Agora roda os scripts do Laravel com o código presente
+RUN composer dump-autoload -o \
+ && php artisan package:discover --ansi
 
 # Permissões Laravel
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
