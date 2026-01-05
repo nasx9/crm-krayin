@@ -3,47 +3,47 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      APP_NAME: ${APP_NAME:-Krayin}
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: ${APP_URL:?}
-      ASSET_URL: ${ASSET_URL:-${APP_URL}}
-      APP_KEY: ${APP_KEY:?}
+      APP_NAME: "CRM Catapulta"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://crm.catapultadigital.com.br"
+      ASSET_URL: "https://crm.catapultadigital.com.br"
+      APP_KEY: "base64:6mSkmvlGK6iV7xHeDhL6+ImXZ7pii0mcHtSNmEAO2x8="
 
-      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-}
-      SESSION_DOMAIN: ${SESSION_DOMAIN:-}
-      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
-      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+      SANCTUM_STATEFUL_DOMAINS: "crm.catapultadigital.com.br"
+      SESSION_DOMAIN: ".catapultadigital.com.br"
+      SESSION_SECURE_COOKIE: "true"
+      SESSION_SAME_SITE: "lax"
 
-      APP_CURRENCY: ${APP_CURRENCY:-BRL}
-      APP_TIMEZONE: ${APP_TIMEZONE:-America/Sao_Paulo}
-      APP_LOCALE: ${APP_LOCALE:-pt_BR}
+      APP_CURRENCY: "BRL"
+      APP_TIMEZONE: "America/Sao_Paulo"
+      APP_LOCALE: "pt_BR"
 
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: "info"
+      LOG_CHANNEL: "stack"
 
-      DB_CONNECTION: ${DB_CONNECTION:-mysql}
-      DB_HOST: ${DB_HOST:-mysql}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_DATABASE: ${DB_DATABASE:?}
-      DB_USERNAME: ${DB_USERNAME:?}
-      DB_PASSWORD: ${DB_PASSWORD:?}
+      DB_CONNECTION: "mysql"
+      DB_HOST: "mysql"
+      DB_PORT: "3306"
+      DB_DATABASE: "krayin"
+      DB_USERNAME: "krayin"
+      DB_PASSWORD: "f5fc464babd5d21735ceec62d6bd2623"
 
-      CACHE_DRIVER: ${CACHE_DRIVER:-redis}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
-      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
 
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
 
-      MAIL_MAILER: ${MAIL_MAILER:-smtp}
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_ENCRYPTION: ${MAIL_ENCRYPTION:-tls}
-      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-no-reply@localhost}
-      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Krayin CRM}
+      MAIL_MAILER: "smtp"
+      MAIL_HOST: ""
+      MAIL_PORT: ""
+      MAIL_USERNAME: ""
+      MAIL_PASSWORD: ""
+      MAIL_ENCRYPTION: "tls"
+      MAIL_FROM_ADDRESS: "no-reply@localhost"
+      MAIL_FROM_NAME: "Krayin CRM"
 
     volumes:
       - krayin_storage:/var/www/html/storage
@@ -64,25 +64,25 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      APP_NAME: ${APP_NAME:-Krayin}
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: ${APP_URL:?}
-      ASSET_URL: ${ASSET_URL:-${APP_URL}}
-      APP_KEY: ${APP_KEY:?}
+      APP_NAME: "CRM Catapulta"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://crm.catapultadigital.com.br"
+      ASSET_URL: "https://crm.catapultadigital.com.br"
+      APP_KEY: "base64:6mSkmvlGK6iV7xHeDhL6+ImXZ7pii0mcHtSNmEAO2x8="
 
-      DB_CONNECTION: ${DB_CONNECTION:-mysql}
-      DB_HOST: ${DB_HOST:-mysql}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_DATABASE: ${DB_DATABASE:?}
-      DB_USERNAME: ${DB_USERNAME:?}
-      DB_PASSWORD: ${DB_PASSWORD:?}
+      DB_CONNECTION: "mysql"
+      DB_HOST: "mysql"
+      DB_PORT: "3306"
+      DB_DATABASE: "krayin"
+      DB_USERNAME: "krayin"
+      DB_PASSWORD: "f5fc464babd5d21735ceec62d6bd2623"
 
-      CACHE_DRIVER: ${CACHE_DRIVER:-redis}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
-      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
 
     volumes:
       - krayin_storage:/var/www/html/storage
@@ -99,25 +99,25 @@ services:
     build: .
     restart: unless-stopped
     environment:
-      APP_NAME: ${APP_NAME:-Krayin}
-      APP_ENV: ${APP_ENV:-production}
-      APP_DEBUG: ${APP_DEBUG:-false}
-      APP_URL: ${APP_URL:?}
-      ASSET_URL: ${ASSET_URL:-${APP_URL}}
-      APP_KEY: ${APP_KEY:?}
+      APP_NAME: "CRM Catapulta"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://crm.catapultadigital.com.br"
+      ASSET_URL: "https://crm.catapultadigital.com.br"
+      APP_KEY: "base64:6mSkmvlGK6iV7xHeDhL6+ImXZ7pii0mcHtSNmEAO2x8="
 
-      DB_CONNECTION: ${DB_CONNECTION:-mysql}
-      DB_HOST: ${DB_HOST:-mysql}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_DATABASE: ${DB_DATABASE:?}
-      DB_USERNAME: ${DB_USERNAME:?}
-      DB_PASSWORD: ${DB_PASSWORD:?}
+      DB_CONNECTION: "mysql"
+      DB_HOST: "mysql"
+      DB_PORT: "3306"
+      DB_DATABASE: "krayin"
+      DB_USERNAME: "krayin"
+      DB_PASSWORD: "f5fc464babd5d21735ceec62d6bd2623"
 
-      CACHE_DRIVER: ${CACHE_DRIVER:-redis}
-      QUEUE_CONNECTION: ${QUEUE_CONNECTION:-redis}
-      SESSION_DRIVER: ${SESSION_DRIVER:-redis}
-      REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
+      CACHE_DRIVER: "redis"
+      QUEUE_CONNECTION: "redis"
+      SESSION_DRIVER: "redis"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
 
     volumes:
       - krayin_storage:/var/www/html/storage
@@ -134,10 +134,10 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:?}
-      MYSQL_USER: ${DB_USERNAME:?}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+      MYSQL_DATABASE: "krayin"
+      MYSQL_USER: "krayin"
+      MYSQL_PASSWORD: "f5fc464babd5d21735ceec62d6bd2623"
+      MYSQL_ROOT_PASSWORD: "f5fc464babd5d21735ceec62d6bd2623"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
