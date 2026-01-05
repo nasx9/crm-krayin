@@ -26,16 +26,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 
 # -----------------------------
-# Apache
+# Apache modules (proxy-aware)
 # -----------------------------
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite headers remoteip
 
-# Define DocumentRoot no Apache (forma limpa)
+# Define DocumentRoot do Apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+
 RUN sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
-    /etc/apache2/sites-available/*.conf \
- && sed -ri -e 's!/var/www/!'"${APACHE_DOCUMENT_ROOT%/public}"'/!g' \
-    /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf || true
+      /etc/apache2/sites-available/*.conf \
+ && sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
+      /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf || true
+
+# Confia no proxy interno do Docker/Coolify para IP real
+RUN printf '%s\n' \
+'RemoteIPHeader X-Forwarded-For' \
+'RemoteIPInternalProxy 10.0.0.0/8' \
+'RemoteIPInternalProxy 172.16.0.0/12' \
+'RemoteIPInternalProxy 192.168.0.0/16' \
+> /etc/apache2/conf-available/remoteip.conf \
+ && a2enconf remoteip
+
+# Garante que o app enxergue HTTPS via header (evita Mixed Content)
+RUN printf '%s\n' \
+'<IfModule mod_headers.c>' \
+'Header always set X-Forwarded-Proto "https"' \
+'</IfModule>' \
+> /etc/apache2/conf-available/forwarded-proto.conf \
+ && a2enconf forwarded-proto
 
 # -----------------------------
 # Composer
@@ -47,13 +65,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # -----------------------------
 WORKDIR /var/www/html
 
-# Copia primeiro os manifests do composer para cache de build
+# Copia manifests primeiro (cache de build)
 COPY src/composer.json src/composer.lock /var/www/html/
 
-# Git safe dir (evita erro em build quando a pasta vira repo)
+# Evita erro de safe.directory em ambientes de build
 RUN git config --global --add safe.directory /var/www/html
 
-# Instala dependências PHP (cacheável)
+# Instala dependências (cacheável)
 RUN composer install \
     --no-dev \
     --prefer-dist \
@@ -61,7 +79,7 @@ RUN composer install \
     --no-interaction \
     --no-progress
 
-# Agora copia o restante do código
+# Copia o restante do código
 COPY src/ /var/www/html
 
 # -----------------------------
@@ -73,18 +91,10 @@ RUN mkdir -p \
     storage/framework/views \
     bootstrap/cache \
  && chown -R www-data:www-data /var/www/html \
- && chmod -R 775 storage bootstrap
+ && chmod -R 775 storage bootstrap/cache
 
 # -----------------------------
-# Opcional: otimizações Laravel (não falhar build se faltar env)
-# -----------------------------
-# Se você quiser, pode ativar depois que o runtime tiver env:
-# RUN php artisan config:cache || true
-# RUN php artisan route:cache || true
-# RUN php artisan view:cache || true
-
-# -----------------------------
-# Healthcheck HTTP (melhor que só Redis)
+# Healthcheck HTTP
 # -----------------------------
 HEALTHCHECK --interval=15s --timeout=5s --retries=10 \
   CMD curl -fsS http://localhost/ >/dev/null || exit 1
