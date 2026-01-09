@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Hot files:"
+ls -la src/public/*vite.hot || true
+echo
+
+echo "Admin Vite client:"
+curl -sI http://127.0.0.1:5173/@vite/client | head -n 5
+echo
+
+echo "Admin login asset references (should include 127.0.0.1:5173 when hot):"
+curl -s http://localhost:8080/admin/login | grep -Eo '127\.0\.0\.1:5173[^"]+|/admin/build/[^"]+' | head -n 30
+echo

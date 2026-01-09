@@ -43,9 +43,7 @@
 
     @stack('meta')
 
-    {{
-        vite()->set(['src/Resources/assets/css/app.css', 'src/Resources/assets/js/app.js'])
-    }}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"

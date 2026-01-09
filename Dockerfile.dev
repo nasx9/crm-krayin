@@ -1,0 +1,51 @@
+FROM php:8.2-apache
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_MEMORY_LIMIT=-1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+    git curl unzip ca-certificates \
+    mariadb-client \
+    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
+    libonig-dev libxml2-dev libzip-dev libicu-dev \
+    $PHPIZE_DEPS \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+
+RUN docker-php-ext-install -j"$(nproc)" \
+    pdo_mysql mbstring exif pcntl bcmath gd zip intl calendar xml fileinfo
+
+RUN pecl install redis \
+ && docker-php-ext-enable redis
+
+RUN a2enmod rewrite headers remoteip
+
+# Allow .htaccess inside public/ (Laravel expects this)
+RUN sed -ri 's/AllowOverride\s+None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
+      /etc/apache2/sites-available/*.conf \
+ && sed -ri -e 's!/var/www/html!'"${APACHE_DOCUMENT_ROOT}"'!g' \
+      /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf || true
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Boot helper to avoid cache path and permission errors with volumes
+RUN printf '%s\n' \
+'#!/usr/bin/env sh' \
+'set -eu' \
+'cd /var/www/html' \
+'mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache' \
+'touch storage/logs/laravel.log 2>/dev/null || true' \
+'chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true' \
+'chmod -R 775 storage bootstrap/cache 2>/dev/null || true' \
+'echo "[krayin-dev-boot] ok"' \
+> /usr/local/bin/krayin-dev-boot \
+&& chmod +x /usr/local/bin/krayin-dev-boot
+
+WORKDIR /var/www/html
+EXPOSE 80

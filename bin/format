@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
+SERVICE="${SERVICE:-krayin}"
+
+echo "[format] Running Laravel Pint..."
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" ./vendor/bin/pint
+echo "[format] Done."

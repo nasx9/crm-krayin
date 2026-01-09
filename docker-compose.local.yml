@@ -1,0 +1,106 @@
+services:
+  krayin:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env.local
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - krayin_vendor:/var/www/html/vendor
+      - krayin_storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["sh", "-lc", "krayin-dev-boot && apache2-foreground"]
+
+  krayin-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env.local
+    volumes:
+      - ./src:/var/www/html
+      - krayin_vendor:/var/www/html/vendor
+      - krayin_storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["sh", "-lc", "krayin-dev-boot && php artisan queue:work --sleep=1 --tries=1 --timeout=120"]
+
+  krayin-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env.local
+    volumes:
+      - ./src:/var/www/html
+      - krayin_vendor:/var/www/html/vendor
+      - krayin_storage:/var/www/html/storage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["sh", "-lc", "krayin-dev-boot && while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+
+  vite:
+    image: node:20-alpine
+    env_file:
+      - .env.local
+    working_dir: /var/www/html
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./src:/var/www/html
+      - node_modules:/var/www/html/node_modules
+    command:
+      [
+        "sh",
+        "-lc",
+        "if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install; fi; npm run dev -- --host 0.0.0.0 --port 5173 --strictPort"
+      ]
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: "krayin"
+      MYSQL_USER: "krayin"
+      MYSQL_PASSWORD: "krayin"
+      MYSQL_ROOT_PASSWORD: "krayin"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  krayin_vendor:
+  krayin_storage:
+  mysql_data:
+  redis_data:
+  node_modules:

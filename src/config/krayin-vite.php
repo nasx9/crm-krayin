@@ -1,4 +1,5 @@
 <?php
+// src/config/krayin-vite.php
 
 return [
     /*

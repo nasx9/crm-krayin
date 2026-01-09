@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
+SERVICE="${SERVICE:-krayin}"
+
+echo "[perms] Ensuring Laravel writable dirs exist and are writable..."
+
+docker compose -f "${COMPOSE_FILE}" exec -u root "${SERVICE}" sh -lc '
+set -e
+cd /var/www/html
+
+mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache
+
+# Common Laravel writable paths
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+
+# Helpful for logs
+touch storage/logs/laravel.log || true
+chown -R www-data:www-data storage/logs || true
+chmod -R 775 storage/logs || true
+
+echo "[perms] OK"
+ls -la storage/framework
+'
+
+echo "[perms] Done."

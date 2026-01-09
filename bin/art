@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
+SERVICE="${SERVICE:-krayin}"
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: bin/art <artisan command...>"
+  exit 1
+fi
+
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" php artisan "$@"

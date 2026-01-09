@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
+TAIL="${TAIL:-200}"
+
+echo "[logs] Tailing logs (tail=${TAIL})..."
+docker compose -f "${COMPOSE_FILE}" logs -f --tail="${TAIL}"

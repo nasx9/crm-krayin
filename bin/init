@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.local.yml}"
+SERVICE="${SERVICE:-krayin}"
+
+echo "[init] Gold setup initialization starting..."
+
+# 1) Start stack
+"${BASH_SOURCE%/*}/up"
+
+# 2) Permissions and directories
+"${BASH_SOURCE%/*}/perms"
+
+# 3) Ensure .env exists in src (preferred pattern)
+# This repo expects Laravel to load src/.env. If it doesn't exist, copy from example.
+if [[ ! -f "src/.env" ]]; then
+  if [[ -f "src/.env.example" ]]; then
+    echo "[init] src/.env not found. Copying src/.env.example -> src/.env"
+    cp src/.env.example src/.env
+  else
+    echo "[init] ERROR: src/.env and src/.env.example not found."
+    exit 1
+  fi
+fi
+
+# 4) Composer install
+echo "[init] Installing PHP dependencies..."
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" composer install
+
+# 5) Generate key (writes to src/.env)
+echo "[init] Generating APP_KEY..."
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" php artisan key:generate
+
+# 6) Clear caches (safety)
+echo "[init] Clearing caches..."
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" php artisan optimize:clear || true
+
+# 7) Install Krayin CRM schema + seed
+echo "[init] Installing Krayin CRM (schema + seed)..."
+docker compose -f "${COMPOSE_FILE}" exec "${SERVICE}" php artisan krayin-crm:install
+
+echo "[init] Done."
+echo "[init] Open: http://localhost:8080"
